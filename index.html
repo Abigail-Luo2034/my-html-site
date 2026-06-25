@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>灵感小溪｜手帐版</title>
+  <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="ambient"></div>
+  <div class="sunlight"></div>
+  <div class="glimmer"></div>
+  <div class="bokeh-wash"></div>
+  <div class="bokeh-field"><canvas class="bokeh-canvas" aria-hidden="true"></canvas></div>
+  <div class="water-moment" aria-hidden="true">
+    <canvas class="rain-canvas top-left" data-corner="top-left"></canvas>
+    <canvas class="rain-canvas bottom-right" data-corner="bottom-right"></canvas>
+  </div>
+  <div class="paper-noise"></div>
+
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="title-row">
+          <h1 class="title">灵感小溪</h1>
+          <div class="eyebrow">IDEA CREEK</div>
+        </div>
+        <p class="subtitle">生活里的念头，轻轻流到这里。<span class="subtitle-en">be water, my friend.</span></p>
+      </div>
+
+      <div class="toolbar-right">
+        <input id="searchInput" class="search" placeholder="搜索想法、关键词、分类……" />
+        <div class="storage-hint">内容、分类与图片都会自动保存在当前浏览器 localStorage 中。</div>
+        <div class="toolbar-inline">
+          <button id="exportBtn" class="mini-btn" type="button">导出 HTML</button>
+          <button id="clearAllBtn" class="mini-btn danger" type="button">清空本地数据</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <section class="side-section">
+          <div class="side-label">日期检索</div>
+          <div class="quick-date-list" id="quickDateList"></div>
+          <input id="datePicker" class="date-picker" type="date" />
+        </section>
+
+        <section class="side-section">
+          <div class="side-label">分类书签</div>
+          <div class="new-category-row">
+            <input id="newCategoryInput" class="new-category-input" placeholder="输入新书签名称，例如：选题 / 情绪 / 洞察" />
+            <button id="addCategoryBtn" class="mini-primary" type="button">新增书签</button>
+          </div>
+          <div class="category-list" id="categoryList"></div>
+        </section>
+
+        <section class="side-section">
+          <div class="side-label">这一页的呼吸</div>
+          <div class="stats-list" id="statsList"></div>
+        </section>
+      </aside>
+
+      <main class="main">
+        <section class="composer">
+          <div class="paper-hole"></div>
+          <div class="paper-lines"></div>
+          <div class="composer-body">
+            <div class="composer-intro">◌ 先记下来，整理可以晚一点。</div>
+
+            <div class="composer-tools">
+              <span class="tool-label">文字样式</span>
+              <button id="boldBtn" class="format-btn" type="button">加粗</button>
+              <button id="redBtn" class="format-btn red" type="button">标红</button>
+              <label class="format-btn" for="imageInput">插入图片</label>
+              <input id="imageInput" type="file" accept="image/*" multiple style="display:none;" />
+            </div>
+
+            <div id="draftInput" class="composer-editor" contenteditable="true" data-placeholder="把刚刚闪过的想法写下来……按 Enter 可以自然分段。"></div>
+            <div id="imagePreviewList" class="image-preview-list"></div>
+
+            <div class="composer-footer">
+              <div class="composer-meta">
+                <span class="meta-note">分类</span>
+                <select id="draftCategory" class="soft-select"></select>
+              </div>
+              <div class="composer-actions">
+                <button id="clearDraftBtn" class="ghost-btn" type="button">清空</button>
+                <button id="saveBtn" class="primary-btn" type="button">记下这一片</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="paper-stream">
+          <div class="paper-hole"></div>
+          <div class="paper-lines"></div>
+          <div class="stream-body">
+            <section class="section-head">
+              <div>
+                <h2 class="section-title">时间流</h2>
+                <div id="resultHint" class="meta-note"></div>
+              </div>
+              <div class="bulk-actions" id="activeFilters"></div>
+            </section>
+
+            <section id="notesContainer" class="notes"></section>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div id="bookmarkContextMenu" class="context-menu" hidden>
+    <button class="context-menu-btn" data-menu-action="rename">重命名</button>
+    <button class="context-menu-btn danger" data-menu-action="delete">删除</button>
+  </div>
+
+  <div id="imageLightbox" class="image-lightbox" hidden>
+    <div class="image-lightbox-backdrop" data-close-lightbox="true"></div>
+    <div class="image-lightbox-shell">
+      <button id="lightboxPrevBtn" class="lightbox-nav" type="button" aria-label="上一张">←</button>
+
+      <div class="image-lightbox-panel">
+        <div class="image-lightbox-hole"></div>
+        <div class="image-lightbox-paper-lines"></div>
+        <div class="image-lightbox-body">
+          <button id="lightboxCloseBtn" class="lightbox-close" type="button" aria-label="关闭预览">×</button>
+          <div class="lightbox-header">
+            <div>
+              <div class="lightbox-kicker">JOURNAL PREVIEW</div>
+              <div id="lightboxCaption" class="lightbox-caption"></div>
+            </div>
+          </div>
+          <div class="lightbox-stage">
+            <img id="lightboxImage" class="lightbox-image" src="" alt="预览图片" />
+          </div>
+          <div class="lightbox-meta">
+            <div id="lightboxCounter" class="lightbox-counter"></div>
+            <div class="lightbox-actions">
+              <button id="lightboxPrevInline" class="mini-btn" type="button">上一张</button>
+              <button id="lightboxNextInline" class="mini-btn" type="button">下一张</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button id="lightboxNextBtn" class="lightbox-nav" type="button" aria-label="下一张">→</button>
+    </div>
+  </div>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
